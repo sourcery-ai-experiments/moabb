@@ -248,7 +248,7 @@ class WithinSessionEvaluation(BaseEvaluation):
                     acc = list()
                     X_ = X[ix]
                     y_ = y[ix] if self.mne_labels else y_cv
-                    for train, test in cv.split(X_, y_):
+                    for id_cv, (train, test) in enumerate(cv.split(X_, y_)):
                         cvclf = clone(grid_clf)
                         cvclf.fit(X_[train], y_[train])
                         acc.append(scorer(cvclf, X_[test], y_[test]))
