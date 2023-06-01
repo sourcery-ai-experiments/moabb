@@ -66,8 +66,6 @@ class BaseParadigm(metaclass=ABCMeta):
                     dataset specific i
         nformation.
         """
-        if dataset is not None:
-            pass
 
     def process_raw(  # noqa: C901
         self, raw, dataset, return_epochs=False, return_raws=False
@@ -168,8 +166,8 @@ class BaseParadigm(metaclass=ABCMeta):
                         self.baseline[0] + dataset.interval[0],
                         self.baseline[1] + dataset.interval[0],
                     )
-                    bmin = baseline[0] if baseline[0] < tmin else tmin
-                    bmax = baseline[1] if baseline[1] > tmax else tmax
+                    bmin = min(baseline[0], tmin)
+                    bmax = max(baseline[1], tmax)
                 else:
                     bmin = tmin
                     bmax = tmax

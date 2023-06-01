@@ -7,6 +7,7 @@ This example demonstrates how to make a model selection in pipelines
 for finding the best model parameter, using grid search. Two models
 are compared, one "vanilla" model with model tuned via grid search.
 """
+
 import os
 
 import joblib
@@ -39,7 +40,7 @@ paradigm = MotorImagery(
 )
 
 # Create a path and folder for every subject
-path = os.path.join(str("Results"))
+path = os.path.join("Results")
 os.makedirs(path, exist_ok=True)
 
 ##############################################################################
@@ -49,24 +50,24 @@ os.makedirs(path, exist_ok=True)
 # l1_ratio ("VanillaEN") and the other using a range of values to select
 # l1_ratio ("GridSearchEN")
 
-pipelines = {}
-pipelines["VanillaEN"] = Pipeline(
-    steps=[
-        ("Covariances", Covariances("cov")),
-        ("Tangent_Space", TangentSpace(metric="riemann")),
-        (
-            "LogistReg",
-            LogisticRegression(
-                penalty="elasticnet",
-                l1_ratio=0.75,
-                intercept_scaling=1000.0,
-                solver="saga",
-                max_iter=1000,
+pipelines = {
+    "VanillaEN": Pipeline(
+        steps=[
+            ("Covariances", Covariances("cov")),
+            ("Tangent_Space", TangentSpace(metric="riemann")),
+            (
+                "LogistReg",
+                LogisticRegression(
+                    penalty="elasticnet",
+                    l1_ratio=0.75,
+                    intercept_scaling=1000.0,
+                    solver="saga",
+                    max_iter=1000,
+                ),
             ),
-        ),
-    ]
-)
-
+        ]
+    )
+}
 pipelines["GridSearchEN"] = Pipeline(
     steps=[
         ("Covariances", Covariances("cov")),
@@ -88,11 +89,9 @@ pipelines["GridSearchEN"] = Pipeline(
 # The search space for parameters is defined as a dictionary, specifying the
 # name of the estimator and the parameter name as a key.
 
-param_grid = {}
-param_grid["GridSearchEN"] = {
-    "LogistReg__l1_ratio": [0.15, 0.30, 0.45, 0.60, 0.75],
+param_grid = {
+    "GridSearchEN": {"LogistReg__l1_ratio": [0.15, 0.30, 0.45, 0.60, 0.75]}
 }
-
 ##############################################################################
 # Running the Evaluation
 # ----------------------

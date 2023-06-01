@@ -56,17 +56,17 @@ class Lee2019(BaseDataset):
                 "5.45": 4,
             }  # dict(up=1, left=2, right=3, down=4)
         else:
-            raise ValueError('unknown paradigm "{}"'.format(paradigm))
+            raise ValueError(f'unknown paradigm "{paradigm}"')
         for s in sessions:
             if s not in [1, 2]:
-                raise ValueError("inexistant session {}".format(s))
+                raise ValueError(f"inexistant session {s}")
         self.sessions = sessions
 
         super().__init__(
             subjects=list(range(1, 55)),
             sessions_per_subject=2,
             events=events,
-            code="Lee2019_" + code_suffix,
+            code=f"Lee2019_{code_suffix}",
             interval=interval,
             paradigm=paradigm,
             doi="10.5524/100542",
@@ -97,7 +97,7 @@ class Lee2019(BaseDataset):
         for k, v in dictionary.items():
             if c.lower() in v:
                 return k
-        raise ValueError('unknown class "{}" for "{}" paradigm'.format(c, self.paradigm))
+        raise ValueError(f'unknown class "{c}" for "{self.paradigm}" paradigm')
 
     def _check_mapping(self, file_mapping):
         def raise_error():
@@ -124,8 +124,9 @@ class Lee2019(BaseDataset):
             ch_names=ch_names, ch_types=[ch_type] * len(ch_names), sfreq=sfreq
         )
         factor = self._scalings.get(ch_type)
-        raw = RawArray(data=signal.transpose(1, 0) * factor, info=info, verbose=verbose)
-        return raw
+        return RawArray(
+            data=signal.transpose(1, 0) * factor, info=info, verbose=verbose
+        )
 
     def _get_single_run(self, data):
         sfreq = data["fs"].item()
@@ -156,9 +157,7 @@ class Lee2019(BaseDataset):
 
     def _get_single_rest_run(self, data, prefix):
         sfreq = data["fs"].item()
-        raw = self._make_raw_array(
-            data["{}_rest".format(prefix)], data["chan"], "eeg", sfreq
-        )
+        raw = self._make_raw_array(data[f"{prefix}_rest"], data["chan"], "eeg", sfreq)
         montage = make_standard_montage("standard_1005")
         raw.set_montage(montage)
         return raw
@@ -173,38 +172,38 @@ class Lee2019(BaseDataset):
             if self.train_run or self.test_run:
                 mat = loadmat(file_path_list[self.sessions.index(session)])
 
-            session_name = "session_{}".format(session)
+            session_name = f"session_{session}"
             sessions[session_name] = {}
             if self.train_run:
                 sessions[session_name]["train"] = self._get_single_run(
-                    mat["EEG_{}_train".format(self.code_suffix)][0, 0]
+                    mat[f"EEG_{self.code_suffix}_train"][0, 0]
                 )
             if self.test_run:
                 sessions[session_name]["test"] = self._get_single_run(
-                    mat["EEG_{}_test".format(self.code_suffix)][0, 0]
+                    mat[f"EEG_{self.code_suffix}_test"][0, 0]
                 )
             if self.resting_state:
                 prefix = "pre"
                 sessions[session_name][
-                    "test_{}_rest".format(prefix)
+                    f"test_{prefix}_rest"
                 ] = self._get_single_rest_run(
-                    mat["EEG_{}_test".format(self.code_suffix)][0, 0], prefix
+                    mat[f"EEG_{self.code_suffix}_test"][0, 0], prefix
                 )
                 sessions[session_name][
-                    "train_{}_rest".format(prefix)
+                    f"train_{prefix}_rest"
                 ] = self._get_single_rest_run(
-                    mat["EEG_{}_train".format(self.code_suffix)][0, 0], prefix
+                    mat[f"EEG_{self.code_suffix}_train"][0, 0], prefix
                 )
                 prefix = "post"
                 sessions[session_name][
-                    "test_{}_rest".format(prefix)
+                    f"test_{prefix}_rest"
                 ] = self._get_single_rest_run(
-                    mat["EEG_{}_test".format(self.code_suffix)][0, 0], prefix
+                    mat[f"EEG_{self.code_suffix}_test"][0, 0], prefix
                 )
                 sessions[session_name][
-                    "train_{}_rest".format(prefix)
+                    f"train_{prefix}_rest"
                 ] = self._get_single_rest_run(
-                    mat["EEG_{}_train".format(self.code_suffix)][0, 0], prefix
+                    mat[f"EEG_{self.code_suffix}_train"][0, 0], prefix
                 )
 
         return sessions

@@ -146,7 +146,7 @@ def benchmark(  # noqa: C901
     # Looping over the evaluations to be done
     df_eval = []
     for evaluation in evaluations:
-        eval_results = dict()
+        eval_results = {}
         for paradigm in prdgms:
             # get the context
             log.debug(f"{paradigm}: {context_params[paradigm]}")
@@ -165,7 +165,7 @@ def benchmark(  # noqa: C901
                 else:
                     ppl_with_array[pn] = pv
 
-            if len(ppl_with_epochs) > 0:
+            if ppl_with_epochs:
                 # Braindecode pipelines require return_epochs=True
                 context = eval_type[evaluation](
                     paradigm=p,
@@ -185,7 +185,7 @@ def benchmark(  # noqa: C901
                 df_eval.append(paradigm_results)
 
             # Other pipelines, that use numpy arrays
-            if len(ppl_with_array) > 0:
+            if ppl_with_array:
                 context = eval_type[evaluation](
                     paradigm=p,
                     datasets=d,
@@ -286,16 +286,18 @@ def _save_results(eval_results, output, plot):
 
 
 def _inc_exc_datasets(datasets, include_datasets, exclude_datasets):
-    d = list()
+    d = []
     if include_datasets is not None:
         # Assert if the inputs are key_codes
         if isinstance(include_datasets[0], str):
             # Map from key_codes to class instances
             datasets_codes = [d.code for d in datasets]
             # Get the indices of the matching datasets
-            for incdat in include_datasets:
-                if incdat in datasets_codes:
-                    d.append(datasets[datasets_codes.index(incdat)])
+            d.extend(
+                datasets[datasets_codes.index(incdat)]
+                for incdat in include_datasets
+                if incdat in datasets_codes
+            )
         else:
             # The case where the class instances have been given
             # can be passed on directly

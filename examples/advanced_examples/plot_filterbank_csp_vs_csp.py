@@ -6,6 +6,7 @@ FilterBank CSP versus CSP
 This example show a comparison of CSP versus FilterBank CSP on the
 very popular dataset 2a from the BCI competition IV.
 """
+
 # Authors: Alexandre Barachant <alexandre.barachant@gmail.com>
 #
 # License: BSD (3-clause)
@@ -43,9 +44,9 @@ moabb.set_log_level("info")
 pipelines = {}
 pipelines["CSP+LDA"] = make_pipeline(CSP(n_components=8), LDA())
 
-pipelines_fb = {}
-pipelines_fb["FBCSP+LDA"] = make_pipeline(FilterBank(CSP(n_components=4)), LDA())
-
+pipelines_fb = {
+    "FBCSP+LDA": make_pipeline(FilterBank(CSP(n_components=4)), LDA())
+}
 ##############################################################################
 # Evaluation
 # ----------

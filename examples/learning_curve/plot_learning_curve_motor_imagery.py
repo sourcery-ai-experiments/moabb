@@ -14,6 +14,7 @@ We will compare two pipelines :
 We will use the LeftRightImagery paradigm. This will restrict the analysis
 to two classes (left- vs right-hand) and use AUC as metric.
 """
+
 # Original author: Alexandre Barachant <alexandre.barachant@gmail.com>
 # Learning curve modification: Jan Sosulski
 #
@@ -49,11 +50,11 @@ moabb.set_log_level("info")
 # The Riemannian geometry pipeline consists in covariance estimation, tangent
 # space mapping and finally a logistic regression for the classification.
 
-pipelines = {}
-
-pipelines["CSP+LDA"] = make_pipeline(
-    CSP(n_components=8), LDA(solver="lsqr", shrinkage="auto")
-)
+pipelines = {
+    "CSP+LDA": make_pipeline(
+        CSP(n_components=8), LDA(solver="lsqr", shrinkage="auto")
+    )
+}
 
 pipelines["RG+LR"] = make_pipeline(
     Covariances(), TangentSpace(), LogisticRegression(solver="lbfgs")

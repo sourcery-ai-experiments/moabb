@@ -2,16 +2,18 @@
 Utils for easy database selection
 """
 
+
 import inspect
 
 import moabb.datasets as db
 from moabb.datasets.base import BaseDataset
 
 
-dataset_list = []
-for ds in inspect.getmembers(db, inspect.isclass):
-    if issubclass(ds[1], BaseDataset):
-        dataset_list.append(ds[1])
+dataset_list = [
+    ds[1]
+    for ds in inspect.getmembers(db, inspect.isclass)
+    if issubclass(ds[1], BaseDataset)
+]
 
 
 def dataset_search(  # noqa: C901
@@ -53,10 +55,7 @@ def dataset_search(  # noqa: C901
     """
     channels = set(channels)
     out_data = []
-    if events is not None and has_all_events:
-        n_classes = len(events)
-    else:
-        n_classes = None
+    n_classes = len(events) if events is not None and has_all_events else None
     assert paradigm in ["imagery", "p300", "ssvep"]
 
     for type_d in dataset_list:
@@ -86,11 +85,10 @@ def dataset_search(  # noqa: C901
                 if e in d.event_id.keys():
                     keep_event_dict[e] = d.event_id[e]
                     n_events += 1
-                else:
-                    if has_all_events:
-                        skip_dataset = True
+                elif has_all_events:
+                    skip_dataset = True
         if keep_event_dict and not skip_dataset:
-            if len(channels) > 0:
+            if channels:
                 s1 = d.get_data([1])[1]
                 sess1 = s1[list(s1.keys())[0]]
                 raw = sess1[list(sess1.keys())[0]]
@@ -126,9 +124,9 @@ def find_intersecting_channels(datasets, verbose=False):
                 # TODO: less hacky way of finding poorly labeled datasets
                 processed.append(ch)
         allchans.update(processed)
-        if len(processed) > 0:
+        if processed:
             if verbose:
-                print("Found EEG channels: {}".format(processed))
+                print(f"Found EEG channels: {processed}")
             dset_chans.append(processed)
             keep_datasets.append(d)
         else:

@@ -60,10 +60,8 @@ def create_example_dataset():
 # Create the fake data
 for subject in [1, 2, 3]:
     x, fs = create_example_dataset()
-    filename = "subject_" + str(subject).zfill(2) + ".mat"
-    mdict = {}
-    mdict["x"] = x
-    mdict["fs"] = fs
+    filename = f"subject_{str(subject).zfill(2)}.mat"
+    mdict = {"x": x, "fs": fs}
     savemat(filename, mdict)
 
 
@@ -120,13 +118,12 @@ class ExampleDataset(BaseDataset):
         data = loadmat(file_path_list[0])
         x = data["x"]
         fs = data["fs"]
-        ch_names = ["ch" + str(i) for i in range(8)] + ["stim"]
-        ch_types = ["eeg" for i in range(8)] + ["stim"]
+        ch_names = [f"ch{str(i)}" for i in range(8)] + ["stim"]
+        ch_types = ["eeg" for _ in range(8)] + ["stim"]
         info = mne.create_info(ch_names, fs, ch_types)
         raw = mne.io.RawArray(x, info)
 
-        sessions = {}
-        sessions["session_1"] = {}
+        sessions = {"session_1": {}}
         sessions["session_1"]["run_1"] = raw
         return sessions
 
@@ -157,8 +154,7 @@ X, labels, meta = paradigm.get_data(dataset=dataset, subjects=[1])
 evaluation = WithinSessionEvaluation(
     paradigm=paradigm, datasets=dataset, overwrite=False, suffix="newdataset"
 )
-pipelines = {}
-pipelines["MDM"] = make_pipeline(Covariances("oas"), MDM(metric="riemann"))
+pipelines = {"MDM": make_pipeline(Covariances("oas"), MDM(metric="riemann"))}
 scores = evaluation.process(pipelines)
 
 print(scores)

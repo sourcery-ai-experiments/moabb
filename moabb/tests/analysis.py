@@ -101,7 +101,7 @@ if _carbonfootprint:
 
 
 def to_pipeline_dict(pnames):
-    return {n: "pipeline {}".format(n) for n in pnames}
+    return {n: f"pipeline {n}" for n in pnames}
 
 
 def to_result_input(pnames, dsets):
@@ -190,7 +190,7 @@ class Test_Results(unittest.TestCase):
         self.obj.add(_in, to_pipeline_dict(["a", "b", "c"]))
         df = self.obj.to_dataframe()
         self.assertTrue(
-            set(np.unique(df["pipeline"])) == set(("a", "b", "c")),
+            set(np.unique(df["pipeline"])) == {"a", "b", "c"},
             np.unique(df["pipeline"]),
         )
         self.assertTrue(df.shape[0] == 6, df.shape[0])

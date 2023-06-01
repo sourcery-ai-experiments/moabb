@@ -155,7 +155,7 @@ class BaseEvaluation(ABC):
                 raise (ValueError("pipelines must only contains Pipelines " "instance"))
 
         for dataset in self.datasets:
-            log.info("Processing dataset: {}".format(dataset.code))
+            log.info(f"Processing dataset: {dataset.code}")
             results = self.evaluate(dataset, pipelines, param_grid)
             for res in results:
                 self.push_result(res, pipelines)
@@ -163,9 +163,9 @@ class BaseEvaluation(ABC):
         return self.results.to_dataframe(pipelines=pipelines)
 
     def push_result(self, res, pipelines):
-        message = "{} | ".format(res["pipeline"])
-        message += "{} | {} | {}".format(
-            res["dataset"].code, res["subject"], res["session"]
+        message = (
+            f'{res["pipeline"]} | '
+            + f'{res["dataset"].code} | {res["subject"]} | {res["session"]}'
         )
         message += ": Score %.3f" % res["score"]
         log.info(message)

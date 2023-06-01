@@ -11,8 +11,8 @@ from moabb.datasets.base import BaseDataset
 
 
 VSPELL_BASE_URL = "https://zenodo.org/record/"
-VISUAL_SPELLER_LLP_URL = VSPELL_BASE_URL + "5831826/files/"
-VISUAL_SPELLER_MIX_URL = VSPELL_BASE_URL + "5831879/files/"
+VISUAL_SPELLER_LLP_URL = f"{VSPELL_BASE_URL}5831826/files/"
+VISUAL_SPELLER_MIX_URL = f"{VSPELL_BASE_URL}5831879/files/"
 OPTICAL_MARKER_CODE = 500
 
 
@@ -48,13 +48,13 @@ class _BaseVisualMatrixSpellerDataset(BaseDataset, ABC):
             print(vhdr_file_path)
 
         session_name = vhdr_file_path.parent.name
-        block_idx = vhdr_file_patter_match.group(1)
-        run_idx = vhdr_file_patter_match.group(2)
+        block_idx = vhdr_file_patter_match[1]
+        run_idx = vhdr_file_patter_match[2]
         return session_name, block_idx, run_idx
 
     def _get_single_subject_data(self, subject):
         subject_data_vhdr_files = self.data_path(subject)
-        sessions = dict()
+        sessions = {}
 
         for _file_idx, subject_data_vhdr_file in enumerate(subject_data_vhdr_files):
             (
@@ -74,7 +74,7 @@ class _BaseVisualMatrixSpellerDataset(BaseDataset, ABC):
             else:
                 session_name = f"{session_name}"
             if session_name not in sessions.keys():
-                sessions[session_name] = dict()
+                sessions[session_name] = {}
             sessions[session_name][run_idx] = raw_bvr_list[0]
 
         return sessions
@@ -293,10 +293,7 @@ def _parse_events(raw_bvr):
         match = stimulus_pattern.match(desc)
         if match is None:
             return None
-        if match.group(1) == "Optic/O":
-            return OPTICAL_MARKER_CODE
-
-        return int(match.group(2))
+        return OPTICAL_MARKER_CODE if match[1] == "Optic/O" else int(match[2])
 
     events, _ = mne.events_from_annotations(
         raw=raw_bvr, event_id=parse_marker, verbose=None
@@ -317,7 +314,7 @@ def _extract_target_non_target_description(events):
     onset_arr = np.empty((n_events,), dtype=np.int64)
     marker_arr = np.empty((n_events,), dtype=np.int64)
 
-    broken_events_idx = list()
+    broken_events_idx = []
     for epoch_idx in range(n_events):
         epoch_start_idx = single_trial_start_end_idx[epoch_idx]
         epoch_end_idx = single_trial_start_end_idx[epoch_idx + 1]

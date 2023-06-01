@@ -105,10 +105,7 @@ def _bi_get_subject_data(ds, subject):  # noqa: C901
             run_name = "run_1"
 
             D = loadmat(file_path)["samples"].T
-            if subject % 2 == 1:
-                S = D[1:33, :] * 1e-6
-            else:
-                S = D[33:65, :] * 1e-6
+            S = D[1:33, :] * 1e-6 if subject % 2 == 1 else D[33:65, :] * 1e-6
             stim = D[-1, :]
             X = np.concatenate([S, stim[None, :]])
             sfreq = 512
@@ -139,10 +136,7 @@ def _bi_get_subject_data(ds, subject):  # noqa: C901
             chtypes = ["eeg"] * 32 + ["stim"]
 
             D = loadmat(file_path)["mat_data"].T
-            if subject % 2 == 1:
-                S = D[1:33, :] * 1e-6
-            else:
-                S = D[33:65, :] * 1e-6
+            S = D[1:33, :] * 1e-6 if subject % 2 == 1 else D[33:65, :] * 1e-6
             stim = D[-1, :]
             idx_target = (stim >= 60) & (stim <= 85)
             idx_nontarget = (stim >= 20) & (stim <= 45)
@@ -187,7 +181,7 @@ def _bi_get_subject_data(ds, subject):  # noqa: C901
             verbose=False,
         )
 
-        if not ds.code == "Virtual Reality dataset":
+        if ds.code != "Virtual Reality dataset":
             raw = mne.io.RawArray(data=X, info=info, verbose=False)
             raw.set_montage(make_standard_montage("standard_1020"))
 
@@ -216,9 +210,7 @@ def _bi_get_subject_data(ds, subject):  # noqa: C901
                     end = idx_repetEndin_local[j + 1]
                     Xbij = Xbi[:, start:end]
                     raw = mne.io.RawArray(data=Xbij, info=info, verbose=False)
-                    sessions[session_name][
-                        "block_" + str(bi + 1) + "-repetition_" + str(j + 1)
-                    ] = raw
+                    sessions[session_name][f"block_{str(bi + 1)}-repetition_{str(j + 1)}"] = raw
 
     return sessions
 
@@ -284,14 +276,14 @@ def _bi_data_path(  # noqa: C901
             meta = yaml.load(stream, Loader=yaml.FullLoader)
         conditions = []
         if ds.adaptive:
-            conditions = conditions + ["adaptive"]
+            conditions += ["adaptive"]
         if ds.nonadaptive:
-            conditions = conditions + ["nonadaptive"]
+            conditions += ["nonadaptive"]
         types = []
         if ds.training:
-            types = types + ["training"]
+            types += ["training"]
         if ds.online:
-            types = types + ["online"]
+            types += ["online"]
         filenames = []
         for run in meta["runs"]:
             run_condition = run["experimental_condition"]
@@ -359,14 +351,13 @@ def _bi_data_path(  # noqa: C901
             zip_ref = z.ZipFile(path_zip, "r")
             zip_ref.extractall(path_folder_subject)
 
-        # filter the data regarding the experimental conditions
-        subject_paths = []
-        for session in [1, 2, 3]:
-            subject_paths.append(
-                osp.join(
-                    path_folder_subject, f"subject_{subject:02}_session_{session:02}.mat"
-                )
+        subject_paths = [
+            osp.join(
+                path_folder_subject,
+                f"subject_{subject:02}_session_{session:02}.mat",
             )
+            for session in [1, 2, 3]
+        ]
     elif ds.code == "Brain Invaders 2015b":
         # TODO: possible fusion with 2014b?
         url = f"{BI2015b_URL}group_{(subject+1)//2:02}_mat.zip"
@@ -389,15 +380,13 @@ def _bi_data_path(  # noqa: C901
             for i in range(1, 5)
         ]
     elif ds.code == "Virtual Reality dataset":
-        subject_paths = []
         url = "{:s}subject_{:02d}_{:s}.mat".format(
             VIRTUALREALITY_URL,
             subject,
             "VR" if ds.virtual_reality else ds.personal_computer,
         )
         file_path = dl.data_path(url, "VIRTUALREALITY")
-        subject_paths.append(file_path)
-
+        subject_paths = [file_path]
     return subject_paths
 
 
@@ -917,19 +906,19 @@ class VirtualReality(BaseDataset):
                 X_select.append(
                     X[
                         meta["run"]
-                        == "block_" + str(block) + "-repetition_" + str(repetition)
+                        == f"block_{str(block)}-repetition_{str(repetition)}"
                     ]
                 )
                 labels_select.append(
                     labels[
                         meta["run"]
-                        == "block_" + str(block) + "-repetition_" + str(repetition)
+                        == f"block_{str(block)}-repetition_{str(repetition)}"
                     ]
                 )
                 meta_select.append(
                     meta[
                         meta["run"]
-                        == "block_" + str(block) + "-repetition_" + str(repetition)
+                        == f"block_{str(block)}-repetition_{str(repetition)}"
                     ]
                 )
         X_select = np.concatenate(X_select)

@@ -48,7 +48,7 @@ class BraindecodeDatasetLoader(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         _check_data_format(X)
-        dataset = create_from_X_y(
+        return create_from_X_y(
             X=X.get_data(),
             y=self.y,
             window_size_samples=X.get_data().shape[2],
@@ -58,8 +58,6 @@ class BraindecodeDatasetLoader(BaseEstimator, TransformerMixin):
             sfreq=X.info["sfreq"],
         )
 
-        return dataset
-
     def __sklearn_is_fitted__(self):
         """Return True since Transfomer is stateless."""
         return True
@@ -67,23 +65,20 @@ class BraindecodeDatasetLoader(BaseEstimator, TransformerMixin):
 
 def get_shape_from_baseconcat(X, param_name):
     """Get the shape of the data after BaseConcatDataset is applied"""
-    if isinstance(X, BaseConcatDataset):
-        in_channel = X[0][0].shape[0]
-        input_window_samples = X[0][0].shape[1]
-        return {param_name[0]: in_channel, param_name[1]: input_window_samples}
-    else:
+    if not isinstance(X, BaseConcatDataset):
         return X.shape
+    in_channel = X[0][0].shape[0]
+    return {param_name[0]: in_channel, param_name[1]: X[0][0].shape[1]}
 
 
 def _find_model_from_braindecode(model_name):
-    # soft dependency on braindecode
-    model_list = []
     import braindecode.models as models
 
-    for ds in getmembers(models, isclass):
-        if issubclass(ds[1], Module):
-            model_list.append(ds[1])
-
+    model_list = [
+        ds[1]
+        for ds in getmembers(models, isclass)
+        if issubclass(ds[1], Module)
+    ]
     for model in model_list:
         if model_name == model.__name__:
             # return an instance of the found model not initialized
@@ -155,17 +150,15 @@ class InputShapeSetterEEG(Callback):
             sub[0]: sub[1] for sub in all_params_module if sub[0] in self.params_list
         }
 
-        # Check if the selected parameters are inside the model parameters
         if Counter(params_get_from_dataset.keys()) != Counter(
             selected_params_module.keys()
         ):
             raise ValueError("Set the correct input name for the model from BrainDecode.")
-        else:
-            # Find the new module based on the current module's class name
-            new_module = _find_model_from_braindecode(net.module.__class__.__name__)
-            # Initialize the new module with the dataset parameters
-            module_initilized = new_module(**params_get_from_dataset)
-            # Set the neural network module to the new initialized module
-            net.set_params(module=module_initilized)
-            # Initialize the new module
-            net.initialize_module()
+        # Find the new module based on the current module's class name
+        new_module = _find_model_from_braindecode(net.module.__class__.__name__)
+        # Initialize the new module with the dataset parameters
+        module_initilized = new_module(**params_get_from_dataset)
+        # Set the neural network module to the new initialized module
+        net.set_params(module=module_initilized)
+        # Initialize the new module
+        net.initialize_module()

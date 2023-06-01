@@ -19,6 +19,7 @@ one session out cross-validation. For each session in the dataset, a model
 is trained on every other session and performance are evaluated on the current
 session.
 """
+
 # Authors: Alexandre Barachant <alexandre.barachant@gmail.com>
 #          Sylvain Chevallier <sylvain.chevallier@uvsq.fr>
 #
@@ -53,9 +54,7 @@ moabb.set_log_level("info")
 # The Riemannian geometry pipeline consists in covariance estimation, tangent
 # space mapping and finally a logistic regression for the classification.
 
-pipelines = {}
-
-pipelines["CSP+LDA"] = make_pipeline(CSP(n_components=8), LDA())
+pipelines = {"CSP+LDA": make_pipeline(CSP(n_components=8), LDA())}
 
 pipelines["RG+LR"] = make_pipeline(
     Covariances(), TangentSpace(), LogisticRegression(solver="lbfgs")

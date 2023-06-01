@@ -101,7 +101,6 @@ class Schirrmeister2017(BaseDataset):
         train_raw, test_raw = [
             raw.pick_types(eeg=True).set_montage(montage) for raw in (train_raw, test_raw)
         ]
-        sessions = {
+        return {
             "session_0": {"train": train_raw, "test": test_raw},
         }
-        return sessions

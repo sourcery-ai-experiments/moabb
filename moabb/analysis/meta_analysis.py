@@ -164,11 +164,11 @@ def compute_pvals_perm(df, order=None):
             pipe2 = order[j]
             data[:, i, j] = df.loc[:, pipe1] - df.loc[:, pipe2]
             data[:, j, i] = df.loc[:, pipe2] - df.loc[:, pipe1]
-    if data.shape[0] > 13:
-        p = _pairedttest_random(data, 10000)
-    else:
-        p = _pairedttest_exhaustive(data)
-    return p
+    return (
+        _pairedttest_random(data, 10000)
+        if data.shape[0] > 13
+        else _pairedttest_exhaustive(data)
+    )
 
 
 def compute_effect(df, order=None):
@@ -287,10 +287,8 @@ def combine_pvalues(p, nsubs):
     """
     if len(p) == 1:
         return p.item()
-    else:
-        W = np.sqrt(nsubs)
-        out = stats.combine_pvalues(np.array(p), weights=W, method="stouffer")[1]
-        return out
+    W = np.sqrt(nsubs)
+    return stats.combine_pvalues(np.array(p), weights=W, method="stouffer")[1]
 
 
 def find_significant_differences(df, perm_cutoff=20):

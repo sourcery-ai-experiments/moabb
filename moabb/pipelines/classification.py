@@ -45,7 +45,7 @@ class SSVEP_CCA(BaseEstimator, ClassifierMixin):
     """
 
     def __init__(self, interval, freqs, n_harmonics=3):
-        self.Yf = dict()
+        self.Yf = {}
         self.cca = CCA(n_components=1)
         self.interval = interval
         self.slen = interval[1] - interval[0]
@@ -67,11 +67,23 @@ class SSVEP_CCA(BaseEstimator, ClassifierMixin):
                 freq = float(f)
                 yf = []
                 for h in range(1, self.n_harmonics + 1):
-                    yf.append(
-                        np.sin(2 * np.pi * freq * h * np.linspace(0, self.slen, n_times))
-                    )
-                    yf.append(
-                        np.cos(2 * np.pi * freq * h * np.linspace(0, self.slen, n_times))
+                    yf.extend(
+                        (
+                            np.sin(
+                                2
+                                * np.pi
+                                * freq
+                                * h
+                                * np.linspace(0, self.slen, n_times)
+                            ),
+                            np.cos(
+                                2
+                                * np.pi
+                                * freq
+                                * h
+                                * np.linspace(0, self.slen, n_times)
+                            ),
+                        )
                     )
                 self.Yf[f] = np.array(yf)
         return self
@@ -308,7 +320,7 @@ class SSVEP_TRCA(BaseEstimator, ClassifierMixin):
 
         if self.method == "original":
             S, Q = self._Q_S_estim(X)
-        elif self.method == "riemann" or self.method == "logeuclid":
+        elif self.method in ["riemann", "logeuclid"]:
             S, Q = self._Q_S_estim_riemann(X)
         else:
             raise ValueError(
@@ -349,7 +361,7 @@ class SSVEP_TRCA(BaseEstimator, ClassifierMixin):
         n_trials, n_channels, n_samples = X.shape
 
         self.sfreq = int(n_samples / self.slen)
-        self.sfreq = self.sfreq / self.downsample
+        self.sfreq /= self.downsample
 
         self.classes_ = np.unique(y)
         self.n_classes = len(self.classes_)
@@ -631,7 +643,7 @@ class SSVEP_MsetCCA(BaseEstimator, ClassifierMixin):
         Z = W.transpose((0, 2, 1)) @ X_white
 
         # Get Ym
-        self.Ym = dict()
+        self.Ym = {}
         for m_class in self.classes_:
             self.Ym[m_class] = Z[y == m_class].transpose(2, 0, 1).reshape(-1, n_times)
 

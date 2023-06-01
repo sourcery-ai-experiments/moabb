@@ -134,11 +134,12 @@ def create_plot_overview(epo, plot_opts=None, path=None, description=""):
 
 
 def epo_summary(epos):
-    summary = dict()
-    summary["mne_string"] = repr(epos)
-    summary["n_channels"] = len(epos.ch_names)
-    summary["n_target"] = len(epos["Target"])
-    summary["n_nontarget"] = len(epos["NonTarget"])
+    summary = {
+        "mne_string": repr(epos),
+        "n_channels": len(epos.ch_names),
+        "n_target": len(epos["Target"]),
+        "n_nontarget": len(epos["NonTarget"]),
+    }
     info_str = (
         f"Ch:{len(epos.ch_names)},T:{len(epos['Target'])},NT:{len(epos['NonTarget'])}"
     )

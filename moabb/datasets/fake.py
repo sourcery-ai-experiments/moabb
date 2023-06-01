@@ -53,12 +53,12 @@ class FakeDataset(BaseDataset):
         )
 
     def _get_single_subject_data(self, subject):
-        data = dict()
-        for session in range(self.n_sessions):
-            data[f"session_{session}"] = {
+        return {
+            f"session_{session}": {
                 f"run_{ii}": self._generate_raw() for ii in range(self.n_runs)
             }
-        return data
+            for session in range(self.n_sessions)
+        }
 
     def _generate_raw(self):
         montage = make_standard_montage("standard_1005")
@@ -106,7 +106,7 @@ class FakeVirtualRealityDataset(FakeDataset):
         )
 
     def _get_single_subject_data(self, subject):
-        data = dict()
+        data = {}
         for session in range(self.n_sessions):
             data[f"{session}"] = {}
             for block in range(self.n_blocks):

@@ -88,16 +88,16 @@ class Shin2017(BaseDataset):
                     "at least one of motor_imagery or" " mental_arithmetic must be true"
                 )
             )
-        events = dict()
+        events = {}
         paradigms = []
         n_sessions = 0
         if motor_imagery:
-            events.update(dict(left_hand=1, right_hand=2))
+            events |= dict(left_hand=1, right_hand=2)
             paradigms.append("imagery")
             n_sessions += 3
 
         if mental_arithmetic:
-            events.update(dict(substraction=3, rest=4))
+            events |= dict(substraction=3, rest=4)
             paradigms.append("arithmetic")
             n_sessions += 3
 

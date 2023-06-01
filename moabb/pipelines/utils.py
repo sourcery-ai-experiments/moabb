@@ -68,8 +68,7 @@ def create_pipeline_from_config(config):
         instance = getattr(mod, component["name"])(**params)
         components.append(instance)
 
-    pipeline = make_pipeline(*components)
-    return pipeline
+    return make_pipeline(*components)
 
 
 def parse_pipelines_from_directory(dir_path):
@@ -91,7 +90,7 @@ def parse_pipelines_from_directory(dir_path):
     """
     assert os.path.isdir(
         os.path.abspath(dir_path)
-    ), "Given pipeline path {} is not valid".format(dir_path)
+    ), f"Given pipeline path {dir_path} is not valid"
 
     # get list of config files
     yaml_files = glob(os.path.join(dir_path, "*.yml"))
@@ -160,7 +159,7 @@ def generate_paradigms(pipeline_configs, context=None, logger=log):
     paradigms = OrderedDict()
     for config in pipeline_configs:
         if "paradigms" not in config.keys():
-            logger.error("{} must have a 'paradigms' key.".format(config))
+            logger.error(f"{config} must have a 'paradigms' key.")
             continue
 
         # iterate over paradigms
@@ -170,11 +169,7 @@ def generate_paradigms(pipeline_configs, context=None, logger=log):
             if len(context) > 0:
                 if paradigm not in context.keys():
                     logger.debug(context)
-                    logger.warning(
-                        "Paradigm {} not in context file {}".format(
-                            paradigm, context.keys()
-                        )
-                    )
+                    logger.warning(f"Paradigm {paradigm} not in context file {context.keys()}")
 
             if isinstance(config["pipeline"], BaseEstimator):
                 pipeline = deepcopy(config["pipeline"])
@@ -187,7 +182,7 @@ def generate_paradigms(pipeline_configs, context=None, logger=log):
                 paradigms[paradigm] = {}
 
             # FIXME name are not unique
-            logger.debug("Pipeline: \n\n {} \n".format(get_string_rep(pipeline)))
+            logger.debug(f"Pipeline: \n\n {get_string_rep(pipeline)} \n")
             paradigms[paradigm][config["name"]] = pipeline
 
     return paradigms
@@ -198,7 +193,7 @@ def generate_param_grid(pipeline_configs, context=None, logger=log):
     param_grid = {}
     for config in pipeline_configs:
         if "paradigms" not in config:
-            logger.error("{} must have a 'paradigms' key.".format(config))
+            logger.error(f"{config} must have a 'paradigms' key.")
             continue
 
         # iterate over paradigms
@@ -246,17 +241,12 @@ class FilterBank(BaseEstimator, TransformerMixin):
             "Each band must return a two dimensional "
             f" matrix, currently have {out[0].ndim}"
         )
-        if self.flatten:
-            return np.concatenate(out, axis=1)
-        else:
-            return np.stack(out, axis=2)
+        return np.concatenate(out, axis=1) if self.flatten else np.stack(out, axis=2)
 
     def __repr__(self):
         estimator_name = type(self).__name__
         estimator_prms = self.estimator.get_params()
-        return "{}(estimator={}, flatten={})".format(
-            estimator_name, estimator_prms, self.flatten
-        )
+        return f"{estimator_name}(estimator={estimator_prms}, flatten={self.flatten})"
 
 
 def filterbank(X, sfreq, idx_fb, peaks):
@@ -293,24 +283,20 @@ def filterbank(X, sfreq, idx_fb, peaks):
     """
 
     # Calibration data comes in batches of trials
-    if X.ndim == 3:
-        num_chans = X.shape[1]
-        num_trials = X.shape[0]
-
-    # Testdata come with only one trial at the time
-    elif X.ndim == 2:
+    if X.ndim == 2:
         num_chans = X.shape[0]
         num_trials = 1
+
+    elif X.ndim == 3:
+        num_chans = X.shape[1]
+        num_trials = X.shape[0]
 
     sfreq = sfreq / 2
 
     min_freq = np.min(peaks)
     max_freq = np.max(peaks)
 
-    if max_freq < 40:
-        top = 100
-    else:
-        top = 115
+    top = 100 if max_freq < 40 else 115
     # Check for Nyquist
     if top >= sfreq:
         top = sfreq - 10
@@ -322,7 +308,7 @@ def filterbank(X, sfreq, idx_fb, peaks):
     passband = [min_freq - 2 + x * diff for x in range(7)]
 
     # At least 40db attenuation in the stopband
-    if min_freq - 4 > 0:
+    if min_freq > 4:
         stopband = [
             min_freq - 4 + x * (diff - 2) if x < 3 else min_freq - 4 + x * diff
             for x in range(7)

@@ -70,21 +70,19 @@ class Vectorizer(BaseEstimator, TransformerMixin):
 #
 # Pipelines must be a dict of sklearn pipeline transformer.
 processing_sampling_rate = 128
-pipelines = {}
-
 ##############################################################################
 # We have to do this because the classes are called 'Target' and 'NonTarget'
 # but the evaluation function uses a LabelEncoder, transforming them
 # to 0 and 1
 labels_dict = {"Target": 1, "NonTarget": 0}
 
-# Riemannian geometry based classification
-pipelines["RG+LDA"] = make_pipeline(
-    XdawnCovariances(nfilter=5, estimator="lwf", xdawn_estimator="scm"),
-    TangentSpace(),
-    LDA(solver="lsqr", shrinkage="auto"),
-)
-
+pipelines = {
+    "RG+LDA": make_pipeline(
+        XdawnCovariances(nfilter=5, estimator="lwf", xdawn_estimator="scm"),
+        TangentSpace(),
+        LDA(solver="lsqr", shrinkage="auto"),
+    )
+}
 pipelines["Xdw+LDA"] = make_pipeline(
     Xdawn(nfilter=2, estimator="scm"), Vectorizer(), LDA(solver="lsqr", shrinkage="auto")
 )

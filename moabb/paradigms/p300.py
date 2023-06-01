@@ -83,7 +83,7 @@ class BaseP300(BaseParadigm):
 
     def is_valid(self, dataset):
         ret = True
-        if not (dataset.paradigm == "p300"):
+        if dataset.paradigm != "p300":
             ret = False
 
         # check if dataset has required events
@@ -202,8 +202,8 @@ class BaseP300(BaseParadigm):
                         self.baseline[0] + dataset.interval[0],
                         self.baseline[1] + dataset.interval[0],
                     )
-                    bmin = baseline[0] if baseline[0] < tmin else tmin
-                    bmax = baseline[1] if baseline[1] > tmax else tmax
+                    bmin = min(baseline[0], tmin)
+                    bmax = max(baseline[1], tmax)
                 else:
                     bmin = tmin
                     bmax = tmax
@@ -254,10 +254,7 @@ class BaseP300(BaseParadigm):
 
     @property
     def datasets(self):
-        if self.tmax is None:
-            interval = None
-        else:
-            interval = self.tmax - self.tmin
+        interval = None if self.tmax is None else self.tmax - self.tmin
         return utils.dataset_search(
             paradigm="p300", events=self.events, interval=interval, has_all_events=True
         )
@@ -313,7 +310,7 @@ class SinglePass(BaseP300):
     """
 
     def __init__(self, fmin=1, fmax=24, **kwargs):
-        if "filters" in kwargs.keys():
+        if "filters" in kwargs:
             raise (ValueError("P300 does not take argument filters"))
         super().__init__(filters=[[fmin, fmax]], **kwargs)
 
@@ -326,7 +323,7 @@ class P300(SinglePass):
     """
 
     def __init__(self, **kwargs):
-        if "events" in kwargs.keys():
+        if "events" in kwargs:
             raise (ValueError("P300 dont accept events"))
         super().__init__(events=["Target", "NonTarget"], **kwargs)
 

@@ -41,10 +41,7 @@ class Test_Downloads(unittest.TestCase):
                 events, _ = mne.events_from_annotations(raw, verbose=False)
             return events
 
-        if isinstance(dataset(), Shin2017):
-            obj = dataset(accept=True)
-        else:
-            obj = dataset()
+        obj = dataset(accept=True) if isinstance(dataset(), Shin2017) else dataset()
         obj.subject_list = obj.subject_list[subj[0] : subj[1]]
         data = obj.get_data(obj.subject_list)
 

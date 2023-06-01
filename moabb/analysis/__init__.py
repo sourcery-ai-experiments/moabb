@@ -54,8 +54,8 @@ def analyze(results, out_path, name="analysis", plot=False):
     with open(os.path.join(analysis_path, "info.txt"), "a") as f:
         dt = datetime.now()
         f.write("Date: {:%Y-%m-%d}\n Time: {:%H:%M}\n".format(dt, dt))
-        f.write("System: {}\n".format(platform.system()))
-        f.write("CPU: {}\n".format(platform.processor()))
+        f.write(f"System: {platform.system()}\n")
+        f.write(f"CPU: {platform.processor()}\n")
 
     results.to_csv(os.path.join(analysis_path, "data.csv"))
 

@@ -126,12 +126,12 @@ class Sosulski2019(BaseDataset):
     def filename_trial_info_extraction(filepath):
         info_pattern = "Oddball_Run_([0-9]+)_Trial_([0-9]+)_SOA_[0-9]\\.([0-9]+)\\.vhdr"
         filename = filepath.split(os.path.sep)[-1]
-        trial_info = dict()
         re_matches = re.match(info_pattern, filename)
-        trial_info["run"] = int(re_matches.group(1))
-        trial_info["trial"] = int(re_matches.group(2))
-        trial_info["soa"] = int(re_matches.group(3))
-        return trial_info
+        return {
+            "run": int(re_matches[1]),
+            "trial": int(re_matches[2]),
+            "soa": int(re_matches[3]),
+        }
 
     def _get_single_run_data(self, file_path):
         non_scalp_channels = ["EOGvu", "x_EMGl", "x_GSR", "x_Respi", "x_Pulse", "x_Optic"]
@@ -178,7 +178,7 @@ class Sosulski2019(BaseDataset):
         file_number = Sosulski2019._map_subject_to_filenumber(subject)
         url = f"{SPOT_PILOT_P300_URL}/FILE{file_number}/content"
         path_zip = dl.data_dl(url, "spot")
-        path_folder = path_zip[:-8] + f"/subject{subject}"
+        path_folder = f"{path_zip[:-8]}/subject{subject}"
 
         # check if has to unzip
         if not (os.path.isdir(path_folder)):

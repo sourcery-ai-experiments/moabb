@@ -71,7 +71,7 @@ extensions = [
 ]
 
 
-def linkcode_resolve(domain, info):  # noqa: C901
+def linkcode_resolve(domain, info):    # noqa: C901
     """Determine the URL corresponding to a Python object.
 
     Parameters
@@ -131,11 +131,7 @@ def linkcode_resolve(domain, info):  # noqa: C901
     except Exception:
         lineno = None
 
-    if lineno:
-        linespec = "#L%d-L%d" % (lineno, lineno + len(source) - 1)
-    else:
-        linespec = ""
-
+    linespec = "#L%d-L%d" % (lineno, lineno + len(source) - 1) if lineno else ""
     # if "dev" in moabb.__version__:
     #     kind = "develop"
     # else:
@@ -346,21 +342,22 @@ other_icons = (
     "wrench",
     "hourglass",
 )
-icons = dict()
+icons = {}
 for icon in brand_icons + fixed_icons + other_icons:
     font = ("fab" if icon in brand_icons else "fas",)  # brand or solid font
     fw = ("fa-fw",) if icon in fixed_icons else ()  # fixed-width
     icons[icon] = font + fw
 
-prolog = ""
-for icon, classes in icons.items():
-    prolog += f"""
+prolog = (
+    "".join(
+        f"""
 .. |{icon}| raw:: html
 
     <i class="{" ".join(classes)} fa-{icon}"></i>
 """
-
-prolog += """
+        for icon, classes in icons.items()
+    )
+    + """
 .. |fix-bug| raw:: html
 
     <span class="fa-stack small-stack">
@@ -368,7 +365,7 @@ prolog += """
         <i class="fas fa-ban fa-stack-2x"></i>
     </span>
 """
-
+)
 prolog += """
 .. |ensp| unicode:: U+2002 .. EN SPACE
 """

@@ -111,24 +111,19 @@ class BaseMAMEM(BaseDataset):
             if self.code == "MAMEM3_SSVEP":
                 repetition = len(fnamed) - 10
                 run_name = f"run_{(ord(fnamed[4])-97)*2 + repetition}"
-            else:
-                run_name = f"run_{ord(fnamed[4])-97}"
-
-            if self.code == "MAMEM3_SSVEP":
                 m = loadmat(fpath)
                 ch_names = [e[0] for e in m["info"][0, 0][9][0]]
                 sfreq = 128
                 montage = make_standard_montage("standard_1020")
                 eeg = m["eeg"]
             else:
+                run_name = f"run_{ord(fnamed[4])-97}"
+
                 m = loadmat(fpath, squeeze_me=True)
                 ch_names = [f"E{i + 1}" for i in range(0, 256)]
                 ch_names.append("stim")
                 sfreq = 250
-                if self.code == "MAMEM2_SSVEP":
-                    labels = m["labels"]
-                else:
-                    labels = None
+                labels = m["labels"] if self.code == "MAMEM2_SSVEP" else None
                 eeg = mamem_event(m["eeg"], m["DIN_1"], labels=labels)
                 montage = make_standard_montage("GSN-HydroCel-256")
             ch_types = ["eeg"] * (len(ch_names) - 1) + ["stim"]
@@ -159,11 +154,7 @@ class BaseMAMEM(BaseDataset):
         fsn = fs_get_file_id(filelist)
         gb = pooch.create(path=path, base_url=MAMEM_URL, registry=reg)
 
-        spath = []
-        for f in fsn.keys():
-            if f[2:4] == sub:
-                spath.append(gb.fetch(fsn[f]))
-        return spath
+        return [gb.fetch(fsn[f]) for f in fsn.keys() if f[2:4] == sub]
 
 
 class MAMEM1(BaseMAMEM):

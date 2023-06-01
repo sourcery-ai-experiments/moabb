@@ -68,7 +68,7 @@ class Test_WithinSess(unittest.TestCase):
             os.remove(path)
 
     def test_eval_results(self):
-        results = [r for r in self.eval.evaluate(dataset, pipelines, param_grid=None)]
+        results = list(self.eval.evaluate(dataset, pipelines, param_grid=None))
 
         # We should get 4 results, 2 sessions 2 subjects
         self.assertEqual(len(results), 4)
@@ -111,9 +111,7 @@ class Test_WithinSess(unittest.TestCase):
 
         # Test grid search
         param_grid = {"C": {"csp__metric": ["euclid", "riemann"]}}
-        results = [
-            r for r in self.eval.evaluate(dataset, pipelines, param_grid=param_grid)
-        ]
+        results = list(self.eval.evaluate(dataset, pipelines, param_grid=param_grid))
 
         # We should get 4 results, 2 sessions 2 subjects
         self.assertEqual(len(results), 4)
@@ -160,9 +158,9 @@ class Test_WithinSessLearningCurve(unittest.TestCase):
             data_size={"policy": "ratio", "value": np.array([0.2, 0.5])},
             n_perms=np.array([2, 2]),
         )
-        results = [
-            r for r in learning_curve_eval.evaluate(dataset, pipelines, param_grid=None)
-        ]
+        results = list(
+            learning_curve_eval.evaluate(dataset, pipelines, param_grid=None)
+        )
         keys = results[0].keys()
         self.assertEqual(len(keys), 10)  # 8 + 2 new for learning curve
         self.assertTrue("permutation" in keys)
@@ -220,7 +218,6 @@ class Test_WithinSessLearningCurve(unittest.TestCase):
         self.assertRaises(ValueError, ev.WithinSessionEvaluation, **decreasing_datasize)
         self.assertRaises(ValueError, ev.WithinSessionEvaluation, **constant_datasize)
         self.assertRaises(ValueError, ev.WithinSessionEvaluation, **increasing_perms)
-        pass
 
 
 class Test_AdditionalColumns(unittest.TestCase):

@@ -80,7 +80,7 @@ class Results:
         if additional_columns is None:
             self.additional_columns = []
         else:
-            assert all([isinstance(ac, str) for ac in additional_columns])
+            assert all(isinstance(ac, str) for ac in additional_columns)
             self.additional_columns = additional_columns
 
         if hdf5_path is None:
@@ -96,7 +96,7 @@ class Results:
             "results",
             paradigm_class.__name__,
             evaluation_class.__name__,
-            "results{}.hdf5".format("_" + suffix),
+            f'results{"_" + suffix}.hdf5',
         )
 
         os.makedirs(osp.dirname(self.filepath), exist_ok=True)
@@ -223,12 +223,11 @@ class Results:
 
     def not_yet_computed(self, pipelines, dataset, subj):
         """Check if a results has already been computed."""
-        ret = {
+        return {
             k: pipelines[k]
             for k in pipelines.keys()
             if not self._already_computed(pipelines[k], dataset, subj)
         }
-        return ret
 
     def _already_computed(self, pipeline, dataset, subject, session=None):
         """Check if we have results for a current combination of pipeline
@@ -238,15 +237,11 @@ class Results:
             # get the digest from repr
             digest = get_digest(pipeline)
 
-            # check if digest present
             if digest not in f.keys():
                 return False
-            else:
-                pipe_grp = f[digest]
-                # if present, check for dataset code
-                if dataset.code not in pipe_grp.keys():
-                    return False
-                else:
-                    # if dataset, check for subject
-                    dset = pipe_grp[dataset.code]
-                    return str(subject).encode("utf-8") in dset["id"][:, 0]
+            pipe_grp = f[digest]
+            if dataset.code not in pipe_grp.keys():
+                return False
+            # if dataset, check for subject
+            dset = pipe_grp[dataset.code]
+            return str(subject).encode("utf-8") in dset["id"][:, 0]

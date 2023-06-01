@@ -106,7 +106,7 @@ class BaseDataset(metaclass=abc.ABCMeta):
         if not isinstance(subjects, list):
             raise (ValueError("subjects must be a list"))
 
-        data = dict()
+        data = {}
         for subject in subjects:
             if subject not in self.subject_list:
                 raise ValueError("Invalid subject {:d} given".format(subject))

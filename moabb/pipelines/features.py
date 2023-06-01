@@ -84,24 +84,21 @@ class AugmentedDataset(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         if self.order == 1:
-            X_fin = X
-        else:
-            X_fin = []
+            return X
+        X_fin = []
 
-            for i in np.arange(X.shape[0]):
-                X_p = X[i][:, : -self.order * self.lag]
-                X_p = np.concatenate(
-                    [X_p]
-                    + [
-                        X[i][:, p * self.lag : -(self.order - p) * self.lag]
-                        for p in range(1, self.order)
-                    ],
-                    axis=0,
-                )
-                X_fin.append(X_p)
-            X_fin = np.array(X_fin)
-
-        return X_fin
+        for i in np.arange(X.shape[0]):
+            X_p = X[i][:, : -self.order * self.lag]
+            X_p = np.concatenate(
+                [X_p]
+                + [
+                    X[i][:, p * self.lag : -(self.order - p) * self.lag]
+                    for p in range(1, self.order)
+                ],
+                axis=0,
+            )
+            X_fin.append(X_p)
+        return np.array(X_fin)
 
 
 class StandardScaler_Epoch(BaseEstimator, TransformerMixin):
@@ -121,6 +118,4 @@ class StandardScaler_Epoch(BaseEstimator, TransformerMixin):
         for i in np.arange(X.shape[0]):
             X_p = StandardScaler().fit_transform(X[i])
             X_fin.append(X_p)
-        X_fin = np.array(X_fin)
-
-        return X_fin
+        return np.array(X_fin)

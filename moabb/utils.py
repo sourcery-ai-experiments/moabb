@@ -95,10 +95,7 @@ def setup_seed(seed: int) -> None:
     tensorflow_return = _set_tensorflow_seed(seed)
     torch_return = _set_torch_seed(seed)
 
-    if tensorflow_return is False or torch_return is False:
-        return False
-    else:
-        return None
+    return False if tensorflow_return is False or torch_return is False else None
 
 
 def set_log_level(level="INFO"):

@@ -12,6 +12,7 @@ We will compare four pipelines :
 
 We will use the SSVEP paradigm, which uses the AUC as metric.
 """
+
 # Authors: Sylvain Chevallier <sylvain.chevallier@uvsq.fr>
 #
 # License: BSD (3-clause)
@@ -92,25 +93,23 @@ freqs = paradigm.used_events(dataset)
 # and the fourth uses the MsetCCA algorithm. Both CCA based methods
 # (i.e. CCA and MsetCCA) used 3 CCA components.
 
-pipelines_fb = {}
-pipelines_fb["RG+LogReg"] = make_pipeline(
-    ExtendedSSVEPSignal(),
-    Covariances(estimator="lwf"),
-    TangentSpace(),
-    LogisticRegression(solver="lbfgs", multi_class="auto"),
-)
-
+pipelines_fb = {
+    "RG+LogReg": make_pipeline(
+        ExtendedSSVEPSignal(),
+        Covariances(estimator="lwf"),
+        TangentSpace(),
+        LogisticRegression(solver="lbfgs", multi_class="auto"),
+    )
+}
 pipelines = {}
 pipelines["CCA"] = make_pipeline(SSVEP_CCA(interval=interval, freqs=freqs, n_harmonics=2))
 
-pipelines_TRCA = {}
-pipelines_TRCA["TRCA"] = make_pipeline(
-    SSVEP_TRCA(interval=interval, freqs=freqs, n_fbands=5)
-)
-
-pipelines_MSET_CCA = {}
-pipelines_MSET_CCA["MSET_CCA"] = make_pipeline(SSVEP_MsetCCA(freqs=freqs))
-
+pipelines_TRCA = {
+    "TRCA": make_pipeline(
+        SSVEP_TRCA(interval=interval, freqs=freqs, n_fbands=5)
+    )
+}
+pipelines_MSET_CCA = {"MSET_CCA": make_pipeline(SSVEP_MsetCCA(freqs=freqs))}
 ##############################################################################
 # Evaluation
 # ----------

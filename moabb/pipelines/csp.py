@@ -33,10 +33,7 @@ class TRCSP(CSP):
         Nt, Ne, Ns = X.shape
         classes = np.unique(y)
         assert len(classes) == 2, "Can only do 2-class TRCSP"
-        # estimate class means
-        C = []
-        for c in classes:
-            C.append(mean_covariance(X[y == c], self.metric))
+        C = [mean_covariance(X[y == c], self.metric) for c in classes]
         C = np.array(C)
 
         # regularize CSP

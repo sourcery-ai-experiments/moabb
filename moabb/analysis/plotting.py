@@ -21,10 +21,7 @@ log = logging.getLogger(__name__)
 
 
 def _simplify_names(x):
-    if len(x) > 10:
-        return x.split(" ")[0]
-    else:
-        return x
+    return x.split(" ")[0] if len(x) > 10 else x
 
 
 def score_plot(data, pipelines=None):
@@ -219,7 +216,7 @@ def summary_plot(sig_df, effect_df, p_threshold=0.05, simplify=True):
     return fig
 
 
-def meta_analysis_plot(stats_df, alg1, alg2):  # noqa: C901
+def meta_analysis_plot(stats_df, alg1, alg2):    # noqa: C901
     """Meta-analysis to compare two algorithms across several datasets
 
     A meta-analysis style plot that shows the standardized effect with
@@ -271,9 +268,9 @@ def meta_analysis_plot(stats_df, alg1, alg2):  # noqa: C901
     ax = fig.add_subplot(gs[0, :-1])
     ax.set_yticks(np.arange(len(dsets) + 1))
     if simplify:
-        ax.set_yticklabels(["Meta-effect"] + [d for d in unique_ids])
+        ax.set_yticklabels(["Meta-effect"] + list(unique_ids))
     else:
-        ax.set_yticklabels(["Meta-effect"] + [d for d in dsets])
+        ax.set_yticklabels(["Meta-effect"] + list(dsets))
     pval_ax = fig.add_subplot(gs[0, -1], sharey=ax)
     plt.setp(pval_ax.get_yticklabels(), visible=False)
     _min = 0

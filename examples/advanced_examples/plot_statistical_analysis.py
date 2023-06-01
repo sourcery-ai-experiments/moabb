@@ -8,6 +8,7 @@ statistical testing. This tutorial focuses on what those exactly are and how
 they can be used.
 
 """
+
 # Authors: Vinay Jayaram <vinayjayaram13@gmail.com>
 #
 # License: BSD (3-clause)
@@ -56,9 +57,7 @@ print(__doc__)
 # The Riemannian geometry pipeline consists in covariance estimation, tangent
 # space mapping and finally a logistic regression for the classification.
 
-pipelines = {}
-
-pipelines["CSP+LDA"] = make_pipeline(CSP(n_components=8), LDA())
+pipelines = {"CSP+LDA": make_pipeline(CSP(n_components=8), LDA())}
 
 pipelines["RG+LR"] = make_pipeline(Covariances(), TangentSpace(), LogisticRegression())
 

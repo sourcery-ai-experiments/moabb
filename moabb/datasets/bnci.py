@@ -30,7 +30,7 @@ def load_data(
     update_path=None,
     base_url=BNCI_URL,
     verbose=None,
-):  # noqa: D301
+):    # noqa: D301
     """Get paths to local copies of a BNCI dataset files.
 
     This will fetch data for a given BNCI dataset. Report to the bnci website
@@ -96,15 +96,15 @@ def load_data(
         "013-2015": BNCI_URL,
     }
 
-    if dataset not in dataset_list.keys():
+    if dataset in dataset_list:
+        return dataset_list[dataset](
+            subject, path, force_update, update_path, baseurl_list[dataset], verbose
+        )
+    else:
         raise ValueError(
             "Dataset '%s' is not a valid BNCI dataset ID. "
             "Valid dataset are %s." % (dataset, ", ".join(dataset_list.keys()))
         )
-
-    return dataset_list[dataset](
-        subject, path, force_update, update_path, baseurl_list[dataset], verbose
-    )
 
 
 @verbose
@@ -135,7 +135,7 @@ def _load_data_001_2014(
         filename = data_path(url, path, force_update, update_path)
         runs, ev = _convert_mi(filename[0], ch_names, ch_types)
         # FIXME: deal with run with no event (1:3) and name them
-        sessions["session_%s" % r] = {"run_%d" % ii: run for ii, run in enumerate(runs)}
+        sessions[f"session_{r}"] = {"run_%d" % ii: run for ii, run in enumerate(runs)}
     return sessions
 
 
@@ -188,8 +188,7 @@ def _load_data_004_2014(
         raws, _ = _convert_mi(filename, ch_names, ch_types)
         sessions.extend(raws)
 
-    sessions = {"session_%d" % ii: {"run_0": run} for ii, run in enumerate(sessions)}
-    return sessions
+    return {"session_%d" % ii: {"run_0": run} for ii, run in enumerate(sessions)}
 
 
 @verbose
@@ -211,9 +210,7 @@ def _load_data_008_2014(
     run = loadmat(filename, struct_as_record=False, squeeze_me=True)["data"]
     raw, event_id = _convert_run_p300_sl(run, verbose=verbose)
 
-    sessions = {"session_0": {"run_0": raw}}
-
-    return sessions
+    return {"session_0": {"run_0": raw}}
 
 
 @verbose
@@ -243,13 +240,9 @@ def _load_data_009_2014(
         # See https://github.com/NeuroTechX/moabb/issues/275
         raw._data[:16, :] /= 10.0
         sess.append(raw)
-        event_id.update(ev)
+        event_id |= ev
 
-    sessions = {}
-    for i, sessi in enumerate(sess):
-        sessions["session_" + str(i)] = {"run_0": sessi}
-
-    return sessions
+    return {f"session_{str(i)}": {"run_0": sessi} for i, sessi in enumerate(sess)}
 
 
 @verbose
@@ -265,11 +258,7 @@ def _load_data_001_2015(
     if (subject < 1) or (subject > 12):
         raise ValueError("Subject must be between 1 and 12. Got %d." % subject)
 
-    if subject in [8, 9, 10, 11]:
-        ses = ["A", "B", "C"]  # 3 sessions for those subjects
-    else:
-        ses = ["A", "B"]
-
+    ses = ["A", "B", "C"] if subject in [8, 9, 10, 11] else ["A", "B"]
     # fmt: off
     ch_names = [
         "FC3", "FCz", "FC4", "C5", "C3", "C1", "Cz",
@@ -283,7 +272,7 @@ def _load_data_001_2015(
         url = "{u}001-2015/S{s:02d}{r}.mat".format(u=base_url, s=subject, r=r)
         filename = data_path(url, path, force_update, update_path)
         runs, ev = _convert_mi(filename[0], ch_names, ch_types)
-        sessions["session_%s" % r] = {"run_%d" % ii: run for ii, run in enumerate(runs)}
+        sessions[f"session_{r}"] = {"run_%d" % ii: run for ii, run in enumerate(runs)}
     return sessions
 
 
@@ -314,8 +303,7 @@ def _load_data_003_2015(
 
     info = create_info(ch_names=ch_names, ch_types=ch_types, sfreq=sfreq)
 
-    sessions = {}
-    sessions["session_0"] = {}
+    sessions = {"session_0": {}}
     for ri, run in enumerate([data.train, data.test]):
         # flash events on the channel 9
         flashs = run[9:10]
@@ -327,10 +315,9 @@ def _load_data_003_2015(
             # char mode
             evd = {"Char%d" % ii: (ii + 2) for ii in range(1, 37)}
         else:
-            # row / column mode
-            evd = {"Col%d" % ii: (ii + 2) for ii in range(1, 7)}
-            evd.update({"Row%d" % ii: (ii + 8) for ii in range(1, 7)})
-
+            evd = {"Col%d" % ii: (ii + 2) for ii in range(1, 7)} | {
+                "Row%d" % ii: (ii + 8) for ii in range(1, 7)
+            }
         # target events are on channel 10
         targets = np.zeros_like(flashs)
         targets[0, ix_flash] = run[10, ix_flash] + 1
@@ -338,7 +325,7 @@ def _load_data_003_2015(
         eeg_data = np.r_[run[1:-2] * 1e-6, targets, flashs]
         raw = RawArray(data=eeg_data, info=info, verbose=verbose)
         raw.set_montage(montage)
-        sessions["session_0"]["run_" + str(ri)] = raw
+        sessions["session_0"][f"run_{str(ri)}"] = raw
 
     return sessions
 
@@ -370,8 +357,7 @@ def _load_data_004_2015(
     # fmt: on
     ch_types = ["eeg"] * 30
     raws, ev = _convert_mi(filename, ch_names, ch_types)
-    sessions = {"session_%d" % ii: {"run_0": run} for ii, run in enumerate(raws)}
-    return sessions
+    return {"session_%d" % ii: {"run_0": run} for ii, run in enumerate(raws)}
 
 
 @verbose
@@ -481,7 +467,7 @@ def _load_data_013_2015(
         for run in data["run"]:
             raw, evd = _convert_run_epfl(run, verbose=verbose)
             raws.append(raw)
-            event_id.update(evd)
+            event_id |= evd
     return raws, event_id
 
 
@@ -504,7 +490,7 @@ def _convert_mi(filename, ch_names, ch_types):
         if raw is None:
             continue
         runs.append(raw)
-        event_id.update(evd)
+        event_id |= evd
     # change labels to match rest
     standardize_keys(event_id)
     return runs, event_id
@@ -572,8 +558,9 @@ def _convert_run_p300_sl(run, verbose=None):
     flash_stim = run.y_stim
     flash_stim[flash_stim > 0] += 2
     eeg_data = np.c_[eeg_data, run.y, flash_stim]
-    event_id = {ev: (ii + 1) for ii, ev in enumerate(run.classes)}
-    event_id.update({ev: (ii + 3) for ii, ev in enumerate(run.classes_stim)})
+    event_id = {ev: (ii + 1) for ii, ev in enumerate(run.classes)} | {
+        ev: (ii + 3) for ii, ev in enumerate(run.classes_stim)
+    }
     info = create_info(ch_names=ch_names, ch_types=ch_types, sfreq=sfreq)
     raw = RawArray(data=eeg_data.T, info=info, verbose=verbose)
     raw.set_montage(montage)
@@ -590,7 +577,7 @@ def _convert_bbci(filename, ch_types, verbose=None):
     for run in data["data"]:
         raw, evd = _convert_run_bbci(run, ch_types, verbose)
         raws.append(raw)
-        event_id.update(evd)
+        event_id |= evd
 
     return raws, event_id
 
@@ -612,10 +599,10 @@ def _convert_run_bbci(run, ch_types, verbose=None):
     flash = np.zeros((len(eeg_data), 1))
     flash[run.trial - 1, 0] = run.y_stim + 2
     ev_fl = {"Stim%d" % (stim): (stim + 2) for stim in np.unique(run.y_stim)}
-    event_id.update(ev_fl)
+    event_id |= ev_fl
 
     eeg_data = np.c_[eeg_data, trigger, flash]
-    ch_names = ch_names + ["Target", "Flash"]
+    ch_names += ["Target", "Flash"]
     ch_types = ch_types + ["stim"] * 2
 
     info = create_info(ch_names=ch_names, ch_types=ch_types, sfreq=sfreq)
@@ -646,7 +633,7 @@ def _convert_run_epfl(run, verbose=None):
             trigger[run.header.EVENT.POS[ii] - 1, 0] = 1
 
     eeg_data = np.c_[eeg_data, trigger]
-    ch_names = ch_names + ["stim"]
+    ch_names += ["stim"]
     ch_types = ch_types + ["stim"]
     event_id = {"correct": 1, "error": 2}
 
@@ -661,8 +648,7 @@ class MNEBNCI(BaseDataset):
 
     def _get_single_subject_data(self, subject):
         """return data for a single subject"""
-        sessions = load_data(subject=subject, dataset=self.code, verbose=False)
-        return sessions
+        return load_data(subject=subject, dataset=self.code, verbose=False)
 
     def data_path(
         self, subject, path=None, force_update=False, update_path=None, verbose=None

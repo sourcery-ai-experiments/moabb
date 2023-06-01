@@ -5,6 +5,7 @@ Cross-session motor imagery with deep learning EEGNet v4 model
 This example shows how to use BrainDecode in combination with MOABB evaluation.
 In this example, we use the architecture EEGNetv4.
 """
+
 # Authors: Igor Carrara <igor.carrara@inria.fr>
 #          Bruno Aristimunha <b.aristimunha@gmail.com>
 #
@@ -128,10 +129,11 @@ clf = EEGClassifier(
 )
 
 # Create the pipelines
-pipes = {}
-pipes["EEGNetV4"] = Pipeline([("Braindecode_dataset", create_dataset), ("Net", clf)])
-
-
+pipes = {
+    "EEGNetV4": Pipeline(
+        [("Braindecode_dataset", create_dataset), ("Net", clf)]
+    )
+}
 ##############################################################################
 # Evaluation
 # ----------

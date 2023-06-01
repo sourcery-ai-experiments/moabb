@@ -149,14 +149,13 @@ def data_dl(url, sign, path=None, force_update=False, verbose=None):
         known_hash = None
     else:
         known_hash = file_hash(str(destination))
-    dlpath = retrieve(
+    return retrieve(
         url,
         known_hash,
         fname=Path(url).name,
         path=str(destination.parent),
         progressbar=True,
     )
-    return dlpath
 
 
 # This function is from https://github.com/cognoma/figshare (BSD-3-Clause)
@@ -193,7 +192,7 @@ def fs_issue_request(method, url, headers, data=None, binary=False):
         except ValueError:
             response_data = response.content
     except HTTPError as error:
-        print("Caught an HTTPError: {}".format(error))
+        print(f"Caught an HTTPError: {error}")
         print("Body:\n", response.text)
         raise
 
@@ -216,14 +215,12 @@ def fs_get_file_list(article_id, version=None):
         HTTP request response as a python dict
     """
     fsurl = "https://api.figshare.com/v2"
+    headers = {"Content-Type": "application/json"}
     if version is None:
-        url = fsurl + "/articles/{}/files".format(article_id)
-        headers = {"Content-Type": "application/json"}
-        response = fs_issue_request("GET", url, headers=headers)
-        return response
+        url = f"{fsurl}/articles/{article_id}/files"
+        return fs_issue_request("GET", url, headers=headers)
     else:
-        url = fsurl + "/articles/{}/versions/{}".format(article_id, version)
-        headers = {"Content-Type": "application/json"}
+        url = f"{fsurl}/articles/{article_id}/versions/{version}"
         request = fs_issue_request("GET", url, headers=headers)
         return request["files"]
 

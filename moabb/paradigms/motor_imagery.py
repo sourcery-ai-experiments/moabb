@@ -79,7 +79,7 @@ class BaseMotorImagery(BaseParadigm):
 
     def is_valid(self, dataset):
         ret = True
-        if not (dataset.paradigm == "imagery"):
+        if dataset.paradigm != "imagery":
             ret = False
 
         # check if dataset has required events
@@ -96,10 +96,7 @@ class BaseMotorImagery(BaseParadigm):
 
     @property
     def datasets(self):
-        if self.tmax is None:
-            interval = None
-        else:
-            interval = self.tmax - self.tmin
+        interval = None if self.tmax is None else self.tmax - self.tmin
         return utils.dataset_search(
             paradigm="imagery", events=self.events, interval=interval, has_all_events=True
         )
@@ -155,7 +152,7 @@ class SinglePass(BaseMotorImagery):
     """
 
     def __init__(self, fmin=8, fmax=32, **kwargs):
-        if "filters" in kwargs.keys():
+        if "filters" in kwargs:
             raise (ValueError("MotorImagery does not take argument filters"))
         super().__init__(filters=[[fmin, fmax]], **kwargs)
 
@@ -180,7 +177,7 @@ class LeftRightImagery(SinglePass):
     """
 
     def __init__(self, **kwargs):
-        if "events" in kwargs.keys():
+        if "events" in kwargs:
             raise (ValueError("LeftRightImagery dont accept events"))
         super().__init__(events=["left_hand", "right_hand"], **kwargs)
 
@@ -200,7 +197,7 @@ class FilterBankLeftRightImagery(FilterBank):
     """
 
     def __init__(self, **kwargs):
-        if "events" in kwargs.keys():
+        if "events" in kwargs:
             raise (ValueError("LeftRightImagery dont accept events"))
         super().__init__(events=["left_hand", "right_hand"], **kwargs)
 
@@ -242,14 +239,14 @@ class FilterBankMotorImagery(FilterBank):
 
     def is_valid(self, dataset):
         ret = True
-        if not dataset.paradigm == "imagery":
+        if dataset.paradigm != "imagery":
             ret = False
         if self.events is None:
-            if not len(dataset.event_id) >= self.n_classes:
+            if len(dataset.event_id) < self.n_classes:
                 ret = False
         else:
             overlap = len(set(self.events) & set(dataset.event_id.keys()))
-            if not overlap >= self.n_classes:
+            if overlap < self.n_classes:
                 ret = False
         return ret
 
@@ -277,10 +274,7 @@ class FilterBankMotorImagery(FilterBank):
 
     @property
     def datasets(self):
-        if self.tmax is None:
-            interval = None
-        else:
-            interval = self.tmax - self.tmin
+        interval = None if self.tmax is None else self.tmax - self.tmin
         return utils.dataset_search(
             paradigm="imagery",
             events=self.events,
@@ -290,10 +284,7 @@ class FilterBankMotorImagery(FilterBank):
 
     @property
     def scoring(self):
-        if self.n_classes == 2:
-            return "roc_auc"
-        else:
-            return "accuracy"
+        return "roc_auc" if self.n_classes == 2 else "accuracy"
 
 
 class MotorImagery(SinglePass):
@@ -357,16 +348,16 @@ class MotorImagery(SinglePass):
 
     def is_valid(self, dataset):
         ret = True
-        if not dataset.paradigm == "imagery":
+        if dataset.paradigm != "imagery":
             ret = False
         elif self.n_classes is None and self.events is None:
             pass
         elif self.events is None:
-            if not len(dataset.event_id) >= self.n_classes:
+            if len(dataset.event_id) < self.n_classes:
                 ret = False
         else:
             overlap = len(set(self.events) & set(dataset.event_id.keys()))
-            if self.n_classes is not None and not overlap >= self.n_classes:
+            if self.n_classes is not None and overlap < self.n_classes:
                 ret = False
         return ret
 
@@ -394,10 +385,7 @@ class MotorImagery(SinglePass):
 
     @property
     def datasets(self):
-        if self.tmax is None:
-            interval = None
-        else:
-            interval = self.tmax - self.tmin
+        interval = None if self.tmax is None else self.tmax - self.tmin
         return utils.dataset_search(
             paradigm="imagery",
             events=self.events,
@@ -407,10 +395,7 @@ class MotorImagery(SinglePass):
 
     @property
     def scoring(self):
-        if self.n_classes == 2:
-            return "roc_auc"
-        else:
-            return "accuracy"
+        return "roc_auc" if self.n_classes == 2 else "accuracy"
 
 
 class FakeImageryParadigm(LeftRightImagery):

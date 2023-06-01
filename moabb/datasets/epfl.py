@@ -110,15 +110,12 @@ class EPFLP300(BaseDataset):
         # the average signal on the mastoids electrodes is used as reference
         references = [32, 33]
         ref = np.mean(signals[references, :], axis=0)
-        signals = signals - ref
+        signals -= ref
 
-        # getting the event time in a Python standardized way
-        events_datetime = []
-        for eventi in events:
-            events_datetime.append(
-                dt.datetime(*eventi.astype(int), int(eventi[-1] * 1e3) % 1000 * 1000)
-            )
-
+        events_datetime = [
+            dt.datetime(*eventi.astype(int), int(eventi[-1] * 1e3) % 1000 * 1000)
+            for eventi in events
+        ]
         # get the indices of the stimuli
         pos = []
         n_trials = len(stimuli)
@@ -134,7 +131,7 @@ class EPFLP300(BaseDataset):
         stim_aux[stimuli != target] = 1
         stim_channel = np.zeros(signals.shape[1])
         stim_channel[pos] = stim_aux
-        ch_names = ch_names + ["STI"]
+        ch_names += ["STI"]
         ch_types = ch_types + ["stim"]
         signals = np.concatenate([signals, stim_channel[None, :]])
 
@@ -161,7 +158,7 @@ class EPFLP300(BaseDataset):
             if session_name not in sessions.keys():
                 sessions[session_name] = {}
 
-            run_name = "run_" + str(len(sessions[session_name]) + 1)
+            run_name = f"run_{str(len(sessions[session_name]) + 1)}"
             sessions[session_name][run_name] = self._get_single_run_data(file_path)
 
         return sessions
@@ -185,6 +182,4 @@ class EPFLP300(BaseDataset):
 
         # get the path to all files
         pattern = os.path.join("subject{:d}".format(subject), "*", "*")
-        subject_paths = glob.glob(path_folder + pattern)
-
-        return subject_paths
+        return glob.glob(path_folder + pattern)

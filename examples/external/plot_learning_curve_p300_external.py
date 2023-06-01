@@ -16,6 +16,7 @@ We will compare three pipelines :
 
 We will use the P300 paradigm, which uses the AUC as metric.
 """
+
 # Authors: Jan Sosulski
 #
 # License: BSD (3-clause)
@@ -51,20 +52,18 @@ moabb.set_log_level("info")
 #
 # Pipelines must be a dict of sklearn pipeline transformer.
 processing_sampling_rate = 128
-pipelines = {}
-
 # We have to do this because the classes are called 'Target' and 'NonTarget'
 # but the evaluation function uses a LabelEncoder, transforming them
 # to 0 and 1
 labels_dict = {"Target": 1, "NonTarget": 0}
 
-# Riemannian geometry based classification
-pipelines["RG+LDA"] = make_pipeline(
-    XdawnCovariances(nfilter=5, estimator="lwf", xdawn_estimator="scm"),
-    TangentSpace(),
-    LDA(solver="lsqr", shrinkage="auto"),
-)
-
+pipelines = {
+    "RG+LDA": make_pipeline(
+        XdawnCovariances(nfilter=5, estimator="lwf", xdawn_estimator="scm"),
+        TangentSpace(),
+        LDA(solver="lsqr", shrinkage="auto"),
+    )
+}
 # Simple LDA pipeline using averaged feature values in certain time intervals
 jumping_mean_ivals = [
     [0.10, 0.139],
@@ -103,7 +102,7 @@ pipelines["JM+TD-LDA"] = make_pipeline(jmv, c)
 paradigm = P300(resample=processing_sampling_rate)
 dataset = BNCI2014009()
 # Remove the slicing of the subject list to evaluate multiple subjects
-dataset.subject_list = dataset.subject_list[0:1]
+dataset.subject_list = dataset.subject_list[:1]
 datasets = [dataset]
 overwrite = True  # set to True if we want to overwrite cached results
 data_size = dict(policy="ratio", value=np.geomspace(0.02, 1, 6))

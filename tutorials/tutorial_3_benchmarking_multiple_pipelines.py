@@ -6,6 +6,7 @@ Tutorial 3: Benchmarking mulitple pipelines
 In this last part, we extend the previous example by assessing the
 classification score of not one but three classification pipelines.
 """
+
 # Authors: Pedro L. C. Rodrigues, Sylvain Chevallier
 #
 # https://github.com/plcrodrigues/Workshop-MOABB-BCI-Graz-2019
@@ -45,8 +46,7 @@ warnings.filterwarnings("ignore")
 # in the tangent space of the covariance matrices estimated from the EEG or a
 # MDM classifier that works directly on covariance matrices.
 
-pipelines = {}
-pipelines["csp+lda"] = make_pipeline(CSP(n_components=8), LDA())
+pipelines = {"csp+lda": make_pipeline(CSP(n_components=8), LDA())}
 pipelines["tgsp+svm"] = make_pipeline(
     Covariances("oas"), TangentSpace(metric="riemann"), SVC(kernel="linear")
 )

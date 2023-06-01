@@ -37,13 +37,13 @@ class Test_Utils(unittest.TestCase):
             "imagery", events=["right_hand", "left_hand", "feet", "tongue", "rest"]
         )
         for out in res:
-            print("multiclass: {}".format(out.event_id.keys()))
+            print(f"multiclass: {out.event_id.keys()}")
 
         res = utils.dataset_search(
             "imagery", events=["right_hand", "feet"], has_all_events=True
         )
         for out in res:
-            self.assertTrue(set(["right_hand", "feet"]) <= set(out.event_id.keys()))
+            self.assertTrue({"right_hand", "feet"} <= set(out.event_id.keys()))
 
     def test_dataset_channel_search(self):
         chans = ["C3", "Cz"]
@@ -55,7 +55,7 @@ class Test_Utils(unittest.TestCase):
             events=["right_hand", "left_hand", "feet", "tongue", "rest"],
             channels=chans,
         )
-        has_types = set([type(x) for x in has_chans])
+        has_types = {type(x) for x in has_chans}
         for d in has_chans:
             s1 = d.get_data([1])[1]
             sess1 = s1[list(s1.keys())[0]]
@@ -91,7 +91,7 @@ class TestSetupSeed(unittest.TestCase):
     @patch.dict("sys.modules", {"tensorflow": MagicMock(), "torch": MagicMock()})
     def test_with_tensorflow_and_torch(self):
         # Test when tensorflow and torch are installed
-        self.assertTrue(setup_seed(42) == None)  # noqa: E711
+        self.assertTrue(setup_seed(42) is None)
 
 
 if __name__ == "__main__":

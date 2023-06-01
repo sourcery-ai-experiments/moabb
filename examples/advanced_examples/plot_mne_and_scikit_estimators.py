@@ -109,11 +109,13 @@ class MyVectorizer(BaseEstimator, TransformerMixin):
 # and a logistic regression. This pipeline is evaluated across session using
 # ROC-AUC metric.
 
-mne_ppl = {}
-mne_ppl["MNE LR"] = make_pipeline(
-    MyVectorizer(), StandardScaler(), LogisticRegression(penalty="l1", solver="liblinear")
-)
-
+mne_ppl = {
+    "MNE LR": make_pipeline(
+        MyVectorizer(),
+        StandardScaler(),
+        LogisticRegression(penalty="l1", solver="liblinear"),
+    )
+}
 mne_eval = CrossSessionEvaluation(
     paradigm=paradigm,
     datasets=datasets,
@@ -133,13 +135,14 @@ mne_res = mne_eval.process(mne_ppl)
 # As an example, we will define a pipeline that computes an XDAWN filter, rescale,
 # then apply a logistic regression.
 
-mne_adv = {}
-mne_adv["XDAWN LR"] = make_pipeline(
-    Xdawn(n_components=5, reg="ledoit_wolf", correct_overlap=False),
-    Vectorizer(),
-    StandardScaler(),
-    LogisticRegression(penalty="l1", solver="liblinear"),
-)
+mne_adv = {
+    "XDAWN LR": make_pipeline(
+        Xdawn(n_components=5, reg="ledoit_wolf", correct_overlap=False),
+        Vectorizer(),
+        StandardScaler(),
+        LogisticRegression(penalty="l1", solver="liblinear"),
+    )
+}
 adv_eval = CrossSessionEvaluation(
     paradigm=paradigm,
     datasets=datasets,
@@ -158,12 +161,13 @@ adv_res = mne_eval.process(mne_adv)
 # pyriemann to estimate XDAWN-extended covariance matrices that are projected
 # on the tangent space and classified with a logistic regression.
 
-sk_ppl = {}
-sk_ppl["RG LR"] = make_pipeline(
-    XdawnCovariances(nfilter=5, estimator="lwf", xdawn_estimator="scm"),
-    TangentSpace(),
-    LogisticRegression(penalty="l1", solver="liblinear"),
-)
+sk_ppl = {
+    "RG LR": make_pipeline(
+        XdawnCovariances(nfilter=5, estimator="lwf", xdawn_estimator="scm"),
+        TangentSpace(),
+        LogisticRegression(penalty="l1", solver="liblinear"),
+    )
+}
 sk_eval = CrossSessionEvaluation(
     paradigm=paradigm,
     datasets=datasets,

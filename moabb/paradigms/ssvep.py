@@ -88,7 +88,7 @@ class BaseSSVEP(BaseParadigm):
 
     def is_valid(self, dataset):
         ret = True
-        if not (dataset.paradigm == "ssvep"):
+        if dataset.paradigm != "ssvep":
             ret = False
 
         # check if dataset has required events
@@ -133,10 +133,7 @@ class BaseSSVEP(BaseParadigm):
 
     @property
     def datasets(self):
-        if self.tmax is None:
-            interval = None
-        else:
-            interval = self.tmax - self.tmin
+        interval = None if self.tmax is None else self.tmax - self.tmin
         return utils.dataset_search(
             paradigm="ssvep",
             events=self.events,
@@ -147,10 +144,7 @@ class BaseSSVEP(BaseParadigm):
 
     @property
     def scoring(self):
-        if self.n_classes == 2:
-            return "roc_auc"
-        else:
-            return "accuracy"
+        return "roc_auc" if self.n_classes == 2 else "accuracy"
 
 
 class SSVEP(BaseSSVEP):
@@ -202,7 +196,7 @@ class SSVEP(BaseSSVEP):
     """
 
     def __init__(self, fmin=7, fmax=45, **kwargs):
-        if "filters" in kwargs.keys():
+        if "filters" in kwargs:
             raise (ValueError("SSVEP does not take argument filters"))
         super().__init__(filters=[(fmin, fmax)], **kwargs)
 

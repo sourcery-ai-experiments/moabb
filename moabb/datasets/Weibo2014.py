@@ -3,6 +3,7 @@ Simple and compound motor imagery
 https://doi.org/10.1371/journal.pone.0114853
 """
 
+
 import logging
 import os
 import shutil
@@ -18,10 +19,11 @@ from .download import get_dataset_path
 
 log = logging.getLogger(__name__)
 
-FILES = []
-FILES.append("https://dataverse.harvard.edu/api/access/datafile/2499178")
-FILES.append("https://dataverse.harvard.edu/api/access/datafile/2499182")
-FILES.append("https://dataverse.harvard.edu/api/access/datafile/2499179")
+FILES = [
+    "https://dataverse.harvard.edu/api/access/datafile/2499178",
+    "https://dataverse.harvard.edu/api/access/datafile/2499182",
+    "https://dataverse.harvard.edu/api/access/datafile/2499179",
+]
 
 
 def eeg_data_path(base_path, subject):
@@ -31,25 +33,27 @@ def eeg_data_path(base_path, subject):
 
     def get_subjects(sub_inds, sub_names, ind):
         dataname = "data{}".format(ind)
-        if not os.path.isfile(os.path.join(base_path, dataname + ".zip")):
+        if not os.path.isfile(os.path.join(base_path, f"{dataname}.zip")):
             retrieve(
                 FILES[ind],
                 None,
-                dataname + ".zip",
+                f"{dataname}.zip",
                 base_path,
                 processor=Unzip(),
                 progressbar=True,
             )
 
-        for fname in os.listdir(os.path.join(base_path, dataname + ".zip.unzip")):
+        for fname in os.listdir(os.path.join(base_path, f"{dataname}.zip.unzip")):
             for ind, prefix in zip(sub_inds, sub_names):
                 if fname.startswith(prefix):
                     os.rename(
-                        os.path.join(base_path, dataname + ".zip.unzip", fname),
+                        os.path.join(
+                            base_path, f"{dataname}.zip.unzip", fname
+                        ),
                         os.path.join(base_path, "subject_{}.mat".format(ind)),
                     )
-        os.remove(os.path.join(base_path, dataname + ".zip"))
-        shutil.rmtree(os.path.join(base_path, dataname + ".zip.unzip"))
+        os.remove(os.path.join(base_path, f"{dataname}.zip"))
+        shutil.rmtree(os.path.join(base_path, f"{dataname}.zip.unzip"))
 
     if not os.path.isfile(os.path.join(base_path, "subject_{}.mat".format(subject))):
         if subject in range(1, 5):

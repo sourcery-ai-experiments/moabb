@@ -20,7 +20,7 @@ DATA_PATH = "https://ndownloader.figshare.com/files/3662952"
 
 
 def local_data_path(base_path, subject):
-    if not os.path.isdir(os.path.join(base_path, "subject_{}".format(subject))):
+    if not os.path.isdir(os.path.join(base_path, f"subject_{subject}")):
         if not os.path.isdir(os.path.join(base_path, "data")):
             retrieve(DATA_PATH, None, fname="data.zip", path=base_path, progressbar=True)
             with z.ZipFile(os.path.join(base_path, "data.zip"), "r") as f:
@@ -28,21 +28,19 @@ def local_data_path(base_path, subject):
             os.remove(os.path.join(base_path, "data.zip"))
         datapath = os.path.join(base_path, "data")
         for i in range(1, 5):
-            os.makedirs(os.path.join(base_path, "subject_{}".format(i)))
+            os.makedirs(os.path.join(base_path, f"subject_{i}"))
             for session in range(1, 4):
                 for run in ["A", "B"]:
                     os.rename(
-                        os.path.join(datapath, "S{}_{}{}.cnt".format(i, session, run)),
+                        os.path.join(datapath, f"S{i}_{session}{run}.cnt"),
                         os.path.join(
-                            base_path,
-                            "subject_{}".format(i),
-                            "{}{}.cnt".format(session, run),
+                            base_path, f"subject_{i}", f"{session}{run}.cnt"
                         ),
                     )
         shutil.rmtree(os.path.join(base_path, "data"))
-    subjpath = os.path.join(base_path, "subject_{}".format(subject))
+    subjpath = os.path.join(base_path, f"subject_{subject}")
     return [
-        [os.path.join(subjpath, "{}{}.cnt".format(y, x)) for x in ["A", "B"]]
+        [os.path.join(subjpath, f"{y}{x}.cnt") for x in ["A", "B"]]
         for y in ["1", "2", "3"]
     ]
 
@@ -104,10 +102,10 @@ class Zhou2016(BaseDataset):
 
         out = {}
         for sess_ind, runlist in enumerate(files):
-            sess_key = "session_{}".format(sess_ind)
+            sess_key = f"session_{sess_ind}"
             out[sess_key] = {}
             for run_ind, fname in enumerate(runlist):
-                run_key = "run_{}".format(run_ind)
+                run_key = f"run_{run_ind}"
                 raw = read_raw_cnt(fname, preload=True, eog=["VEOU", "VEOL"])
                 stim = raw.annotations.description.astype(np.dtype("<10U"))
                 stim[stim == "1"] = "left_hand"
