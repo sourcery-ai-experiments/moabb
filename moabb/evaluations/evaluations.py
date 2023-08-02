@@ -173,18 +173,10 @@ class WithinSessionEvaluation(BaseEvaluation):
                     os.path.join(name_grid, "Grid_Search_WithinSession.pkl"),
                 )
                 del search
-                return grid_clf
-
-            else:
-                return grid_clf
-
         elif param_grid is not None and os.path.isdir(name_grid):
             search = joblib.load(os.path.join(name_grid, "Grid_Search_WithinSession.pkl"))
             grid_clf.set_params(**search.best_params_)
-            return grid_clf
-
-        elif param_grid is None:
-            return grid_clf
+        return grid_clf
 
     # flake8: noqa: C901
 
@@ -260,7 +252,7 @@ class WithinSessionEvaluation(BaseEvaluation):
 
                 if isinstance(X, BaseEpochs):
                     scorer = get_scorer(self.paradigm.scoring)
-                    acc = list()
+                    acc = []
                     X_ = X[ix]
                     y_ = y[ix] if self.mne_labels else y_cv
                     for cv_ind, (train, test) in enumerate(cv.split(X_, y_)):
@@ -329,14 +321,12 @@ class WithinSessionEvaluation(BaseEvaluation):
             upto = np.ceil(vals * len(y)).astype(int)
             indices = [np.array(range(i)) for i in upto]
         elif self.data_size["policy"] == "per_class":
-            classwise_indices = dict()
+            classwise_indices = {}
             n_smallest_class = np.inf
             for cl in np.unique(y):
                 cl_i = np.where(cl == y)[0]
                 classwise_indices[cl] = cl_i
-                n_smallest_class = (
-                    len(cl_i) if len(cl_i) < n_smallest_class else n_smallest_class
-                )
+                n_smallest_class = min(len(cl_i), n_smallest_class)
             indices = []
             for ds in self.data_size["value"]:
                 if ds > n_smallest_class:
@@ -525,18 +515,10 @@ class CrossSessionEvaluation(BaseEvaluation):
                     os.path.join(name_grid, "Grid_Search_CrossSession.pkl"),
                 )
                 del search
-                return grid_clf
-
-            else:
-                return grid_clf
-
         elif param_grid is not None and os.path.isdir(name_grid):
             search = joblib.load(os.path.join(name_grid, "Grid_Search_CrossSession.pkl"))
             grid_clf.set_params(**search.best_params_)
-            return grid_clf
-
-        elif param_grid is None:
-            return grid_clf
+        return grid_clf
 
     # flake8: noqa: C901
     def evaluate(self, dataset, pipelines, param_grid):
@@ -741,19 +723,11 @@ class CrossSubjectEvaluation(BaseEvaluation):
                     os.path.join(name_grid, "Grid_Search_CrossSubject.pkl"),
                 )
                 del search
-                return pipelines[name]
-
-            else:
-                return pipelines[name]
-
         elif param_grid is not None and os.path.isdir(name_grid):
             search = joblib.load(os.path.join(name_grid, "Grid_Search_CrossSubject.pkl"))
 
             pipelines[name].set_params(**search.best_params_)
-            return pipelines[name]
-
-        elif param_grid is None:
-            return pipelines[name]
+        return pipelines[name]
 
     # flake8: noqa: C901
     def evaluate(self, dataset, pipelines, param_grid):
@@ -765,8 +739,8 @@ class CrossSubjectEvaluation(BaseEvaluation):
         # we might need a better granularity, if we query the DB
         run_pipes = {}
         for subject in dataset.subject_list:
-            run_pipes.update(self.results.not_yet_computed(pipelines, dataset, subject))
-        if len(run_pipes) == 0:
+            run_pipes |= self.results.not_yet_computed(pipelines, dataset, subject)
+        if not run_pipes:
             return
 
         # get the data
