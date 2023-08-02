@@ -150,8 +150,9 @@ class WithinSessionEvaluation(BaseEvaluation):
         if param_grid is not None and not os.path.isdir(name_grid):
             if name in param_grid:
                 alter_grid = deepcopy(grid_clf)
-                if alter_grid.estimator.__class__.__name__ == "SPDNet":
-                    alter_grid.estimator = MDM()
+
+                if alter_grid.steps[-1].__class__.__name__ == "SPDNet":
+                    alter_grid.steps[-1] = MDM()
 
                 search = GridSearchCV(
                     alter_grid,
@@ -502,9 +503,9 @@ class CrossSessionEvaluation(BaseEvaluation):
         if param_grid is not None and not os.path.isdir(name_grid):
             if name in param_grid:
                 alter_grid = deepcopy(grid_clf)
-                if alter_grid.estimator.__class__.__name__ == "SPDNet":
-                    alter_grid.estimator = MDM()
 
+                if alter_grid.steps[-1].__class__.__name__ == "SPDNet":
+                    alter_grid.steps[-1] = MDM()
                 search = GridSearchCV(
                     alter_grid,
                     param_grid[name],
