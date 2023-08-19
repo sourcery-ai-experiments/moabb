@@ -108,7 +108,7 @@ enables one to have a reproducible environment on all popular OS (Linux, MacOS a
 Windows) and provides easy publishing pipeline.
 
 Another tool that makes development more stable is
-[`pre-commit`](https://pre-commit.com/). It automatically runs variety of Code Quality
+[`pre-commit`](pip install pre-commit). It automatically runs variety of Code Quality
 instruments against the code you produced.
 
 For Code Quality verification, we use:
@@ -117,6 +117,11 @@ For Code Quality verification, we use:
 - [`isort`](https://github.com/timothycrosley/isort) - imports sorting and grouping
 - [`flake8`](https://gitlab.com/pycqa/flake8) - code style checking
 - [`prettier`](https://github.com/prettier/prettier) - `.yml` and `.md` files formatting
+- [`blacken-docs`](https://github.com/adamchainz/blacken-docs) - Black doc formatting
+- [`ruff`](https://github.com/astral-sh/ruff) - General linting
+- [`codespell`](https://github.com/codespell-project/codespell) - Code spelling checking
+- [`yamllint`](https://github.com/adrienverge/yamllint.git) - `.yml` YAML files linting
+
 
 ### Generate the documentation
 
